@@ -1,3 +1,6 @@
+## To get started
+- add your own .env and add `VITE_YOUTUBE_API_KEY=` with your own api key ( for obvious reasons its not in the repo)
+
 ## Project overview
 - React + TypeScript video listing built for the ONE React video display code test
 - Uses the YouTube Data API to fetch and display videos
