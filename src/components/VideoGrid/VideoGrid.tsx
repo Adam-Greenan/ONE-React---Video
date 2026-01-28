@@ -5,8 +5,16 @@ import { VirtuosoGrid } from 'react-virtuoso';
 
 export interface IVideoGridProps {
   videos: Video[];
+  onEndReached: () => void;
+  infiniteScrollEnabled: boolean;
+  isLoading: boolean;
 }
-export const VideoGrid: React.FunctionComponent<IVideoGridProps> = ({ videos }) => {
+export const VideoGrid: React.FunctionComponent<IVideoGridProps> = ({
+  videos,
+  infiniteScrollEnabled,
+  onEndReached,
+  isLoading
+}) => {
   return (
     <VirtuosoGrid
       useWindowScroll
@@ -39,6 +47,9 @@ export const VideoGrid: React.FunctionComponent<IVideoGridProps> = ({ videos }) 
       }}
       listClassName={styles.videoGrid}
       itemClassName={styles.videoGridItem}
+      endReached={
+        infiniteScrollEnabled && !isLoading ? () => onEndReached() : undefined
+      }
     />
   );
 };

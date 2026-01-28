@@ -1,5 +1,5 @@
-import { loadCache, saveCache } from "@helpers/sessionStorage";
-import React, { createContext, useContext, useReducer, type ReactNode } from "react";
+import { loadCache, saveCache } from '@helpers/sessionStorage';
+import React, { createContext, useContext, useReducer, type ReactNode } from 'react';
 
 type Video = {
   id: string;
@@ -14,68 +14,77 @@ export interface YoutubeState {
   query: string;
   videos: Video[];
   nextPageToken?: string;
-  status: "idle" | "loading" | "success" | "error";
+  status: 'idle' | 'loading' | 'success' | 'error';
   error?: string;
+  infiniteScrollEnabled: boolean;
 }
 
 type Action =
-  | { type: "setQuery"; payload: string }
-  | { type: "loading" }
-  | { type: "success"; payload: { videos: Video[]; nextPageToken?: string, append?: boolean } }
-  | { type: "error"; payload: string }
-  | { type: "clear" };
+  | { type: 'setQuery'; payload: string }
+  | { type: 'loading' }
+  | { type: 'success'; payload: { videos: Video[]; nextPageToken?: string; append?: boolean } }
+  | { type: 'error'; payload: string }
+  | { type: 'clear' }
+  | { type: 'enableInfiniteScroll' };
 
 const initialState: YoutubeState = {
-  query: "",
+  query: '',
   videos: [],
   nextPageToken: undefined,
-  status: "idle",
+  status: 'idle',
   error: undefined,
+  infiniteScrollEnabled: false,
 };
 
-const youtubeReducer = (
-  state: YoutubeState = initialState,
-  action: Action
-): YoutubeState => {
+const youtubeReducer = (state: YoutubeState = initialState, action: Action): YoutubeState => {
   let newState = state;
 
   switch (action.type) {
-    case "setQuery":
+    case 'setQuery':
       newState = {
         ...state,
         query: action.payload,
       };
       break;
 
-    case "loading":
+    case 'loading':
       newState = {
         ...state,
-        status: "loading",
+        status: 'loading',
         error: undefined,
       };
       break;
 
-    case "success":
+    case 'success':
       newState = {
         ...state,
-        status: "success",
-        videos: action.payload.append ? [...state.videos, ...action.payload.videos] : action.payload.videos,
+        status: 'success',
+        videos: action.payload.append
+          ? [...state.videos, ...action.payload.videos]
+          : action.payload.videos,
         nextPageToken: action.payload.nextPageToken,
         error: undefined,
       };
       break;
 
-    case "error":
+    case 'error':
       newState = {
         ...state,
-        status: "error",
+        status: 'error',
         error: action.payload,
       };
       break;
 
-    case "clear":
+    case 'clear':
       newState = {
         ...initialState,
+      };
+      break;
+
+    case 'enableInfiniteScroll':
+      newState = {
+        ...state,
+        infiniteScrollEnabled: true,
       };
       break;
 
@@ -91,8 +100,7 @@ export const YoutubeContext = createContext<[YoutubeState, React.Dispatch<Action
   () => {},
 ]);
 
-export const useYoutube = (): [YoutubeState, React.Dispatch<Action>] =>
-  useContext(YoutubeContext);
+export const useYoutube = (): [YoutubeState, React.Dispatch<Action>] => useContext(YoutubeContext);
 
 interface YoutubeProviderProps {
   children: ReactNode;
@@ -104,11 +112,11 @@ export const YoutubeProvider: React.FC<YoutubeProviderProps> = ({ children, valu
 
   const [youtubeState, youtubeDispatch] = useReducer(
     youtubeReducer,
-    cached || value || initialState
+    cached || value || initialState,
   );
 
   React.useEffect(() => {
-    if (youtubeState.status === "success") {
+    if (youtubeState.status === 'success') {
       saveCache(youtubeState);
     }
   }, [youtubeState]);

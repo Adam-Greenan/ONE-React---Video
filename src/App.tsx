@@ -11,6 +11,8 @@ function App() {
   };
 
   const handleLoadMore = async () => {
+    youtubeDispatch({ type: 'enableInfiniteScroll' });
+
     await runYoutubeSearch(youtubeState.query, youtubeDispatch, {
       pageToken: youtubeState.nextPageToken,
       append: true,
@@ -38,7 +40,17 @@ function App() {
         <p style={{ marginTop: 12 }}>Error: {youtubeState.error}</p>
       )}
 
-      <VideoGrid videos={youtubeState.videos} />
+      <VideoGrid
+        videos={youtubeState.videos}
+        onEndReached={() =>
+          runYoutubeSearch(youtubeState.query, youtubeDispatch, {
+            pageToken: youtubeState.nextPageToken,
+            append: true,
+          })
+        }
+        isLoading={youtubeState.status === "loading"}
+        infiniteScrollEnabled={youtubeState.infiniteScrollEnabled}
+      />
       <button onClick={handleLoadMore}>Next page</button>
     </div>
   );
