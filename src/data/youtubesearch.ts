@@ -1,5 +1,5 @@
-import { Youtube } from '@api/Youtube/Youtube';
-import type { IResponse } from '@src/types';
+import { Youtube } from "@api/Youtube/Youtube";
+import type { IResponse } from "@src/types";
 
 export type Video = {
   id: string;
@@ -18,7 +18,7 @@ export type YoutubeSearchResult = {
 const toWatchUrl = (id: string) => `https://www.youtube.com/watch?v=${id}`;
 
 const pickThumb = (thumbs: any): string =>
-  thumbs?.high?.url ?? thumbs?.medium?.url ?? thumbs?.default?.url ?? '';
+  thumbs?.high?.url ?? thumbs?.medium?.url ?? thumbs?.default?.url ?? "";
 
 export const searchYoutube = async (args: {
   query: string;
@@ -26,10 +26,10 @@ export const searchYoutube = async (args: {
   pageToken?: string;
 }): Promise<IResponse> => {
   const response = await Youtube({
-    path: '/search',
+    path: "/search",
     params: {
-      part: 'snippet',
-      type: 'video',
+      part: "snippet",
+      type: "video",
       q: args.query,
       maxResults: args.pageSize ?? 9,
       pageToken: args.pageToken,
@@ -44,14 +44,14 @@ export const searchYoutube = async (args: {
 
   const videos: Video[] =
     data?.items?.map((item: any) => {
-      const id = item?.id?.videoId ?? '';
+      const id = item?.id?.videoId ?? "";
       const snippet = item?.snippet ?? {};
 
       return {
         id,
-        title: snippet.title ?? '',
-        channelTitle: snippet.channelTitle ?? '',
-        publishedAt: snippet.publishedAt ?? '',
+        title: snippet.title ?? "",
+        channelTitle: snippet.channelTitle ?? "",
+        publishedAt: snippet.publishedAt ?? "",
         thumbnailUrl: pickThumb(snippet.thumbnails),
         url: toWatchUrl(id),
       };

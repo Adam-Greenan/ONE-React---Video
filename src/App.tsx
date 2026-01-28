@@ -8,6 +8,10 @@ function App() {
     await runYoutubeSearch(youtubeState.query, youtubeDispatch);
   };
 
+  const handleLoadMore = async () => {
+    await runYoutubeSearch(youtubeState.query, youtubeDispatch, { pageToken: youtubeState.nextPageToken, append: true})
+  }
+
   return (
     <div style={{ padding: 16 }}>
       <div style={{ display: "flex", gap: 8 }}>
@@ -59,6 +63,7 @@ function App() {
           </a>
         ))}
       </div>
+      <button onClick={handleLoadMore}>Next page</button>
     </div>
   );
 }

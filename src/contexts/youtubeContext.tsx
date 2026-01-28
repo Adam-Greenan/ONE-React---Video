@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useReducer, type ReactNode } from 'react';
+import { loadCache, saveCache } from "@helpers/sessionStorage";
+import React, { createContext, useContext, useReducer, type ReactNode } from "react";
 
 type Video = {
   id: string;
@@ -13,22 +14,22 @@ export interface YoutubeState {
   query: string;
   videos: Video[];
   nextPageToken?: string;
-  status: 'idle' | 'loading' | 'success' | 'error';
+  status: "idle" | "loading" | "success" | "error";
   error?: string;
 }
 
 type Action =
-  | { type: 'setQuery'; payload: string }
-  | { type: 'loading' }
-  | { type: 'success'; payload: { videos: Video[]; nextPageToken?: string } }
-  | { type: 'error'; payload: string }
-  | { type: 'clear' };
+  | { type: "setQuery"; payload: string }
+  | { type: "loading" }
+  | { type: "success"; payload: { videos: Video[]; nextPageToken?: string, append?: boolean } }
+  | { type: "error"; payload: string }
+  | { type: "clear" };
 
 const initialState: YoutubeState = {
-  query: '',
+  query: "",
   videos: [],
   nextPageToken: undefined,
-  status: 'idle',
+  status: "idle",
   error: undefined,
 };
 
@@ -39,40 +40,40 @@ const youtubeReducer = (
   let newState = state;
 
   switch (action.type) {
-    case 'setQuery':
+    case "setQuery":
       newState = {
         ...state,
         query: action.payload,
       };
       break;
 
-    case 'loading':
+    case "loading":
       newState = {
         ...state,
-        status: 'loading',
+        status: "loading",
         error: undefined,
       };
       break;
 
-    case 'success':
+    case "success":
       newState = {
         ...state,
-        status: 'success',
-        videos: action.payload.videos,
+        status: "success",
+        videos: action.payload.append ? [...state.videos, ...action.payload.videos] : action.payload.videos,
         nextPageToken: action.payload.nextPageToken,
         error: undefined,
       };
       break;
 
-    case 'error':
+    case "error":
       newState = {
         ...state,
-        status: 'error',
+        status: "error",
         error: action.payload,
       };
       break;
 
-    case 'clear':
+    case "clear":
       newState = {
         ...initialState,
       };
@@ -99,10 +100,18 @@ interface YoutubeProviderProps {
 }
 
 export const YoutubeProvider: React.FC<YoutubeProviderProps> = ({ children, value }) => {
+  const cached: YoutubeState = loadCache();
+
   const [youtubeState, youtubeDispatch] = useReducer(
     youtubeReducer,
-    value || initialState
+    cached || value || initialState
   );
+
+  React.useEffect(() => {
+    if (youtubeState.status === "success") {
+      saveCache(youtubeState);
+    }
+  }, [youtubeState]);
 
   return (
     <YoutubeContext.Provider value={[youtubeState, youtubeDispatch]}>
