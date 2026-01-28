@@ -21,23 +21,44 @@ function App() {
 
   return (
     <div className={styles.container}>
-      <div style={{ display: 'flex', gap: 8 }}>
-        <input
-          value={youtubeState.query}
-          placeholder="Search YouTube..."
-          onChange={(e) => youtubeDispatch({ type: 'setQuery', payload: e.target.value })}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') onSearch();
-          }}
-        />
+      <div className={styles.headerContainer}>
+        <div className={styles.searchContainer}>
+          <input
+            value={youtubeState.query}
+            className={styles.textInput}
+            placeholder="Search YouTube..."
+            onChange={(e) => youtubeDispatch({ type: 'setQuery', payload: e.target.value })}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') onSearch();
+            }}
+          />
 
-        <button onClick={onSearch} disabled={youtubeState.status === 'loading'}>
-          {youtubeState.status === 'loading' ? 'Searching...' : 'Search'}
-        </button>
+          <button
+            onClick={onSearch}
+            disabled={youtubeState.status === 'loading'}
+            className={styles.actionButton}
+          >
+            {youtubeState.status === 'loading' ? 'Searching...' : 'Search'}
+          </button>
+
+          <button
+            disabled={youtubeState.status === 'loading'}
+            onClick={() => {
+              youtubeDispatch({ type: 'clear' });
+            }}
+            className={styles.actionButton}
+          >
+            Clear search results
+          </button>
+        </div>
+        <div className={styles.filterContainer}>
+          <label className={styles.label} htmlFor="filter">Filter:</label>
+          <input type="text" name="filter" className={styles.textInput} aria-disabled="true" />
+        </div>
       </div>
 
       {youtubeState.status === 'error' && (
-        <p style={{ marginTop: 12 }}>Error: {youtubeState.error}</p>
+        <p className={styles.errorMessage}>Error: {youtubeState.error}</p>
       )}
 
       <VideoGrid
@@ -48,10 +69,14 @@ function App() {
             append: true,
           })
         }
-        isLoading={youtubeState.status === "loading"}
+        isLoading={youtubeState.status === 'loading'}
         infiniteScrollEnabled={youtubeState.infiniteScrollEnabled}
       />
-      <button onClick={handleLoadMore}>Next page</button>
+      <div className={styles.actionButtonsContainer}>
+        <button className={styles.actionButton} onClick={handleLoadMore}>
+          Next page
+        </button>
+      </div>
     </div>
   );
 }
