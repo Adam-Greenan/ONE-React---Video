@@ -1,35 +1,65 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
+import { useYoutube } from "@contexts/youtubeContext";
+import { runYoutubeSearch } from "@helpers/youtubeSearch";
 
 function App() {
-  const [count, setCount] = useState(0);
+  const [youtubeState, youtubeDispatch] = useYoutube();
+
+  const onSearch = async () => {
+    await runYoutubeSearch(youtubeState.query, youtubeDispatch);
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
+    <div style={{ padding: 16 }}>
+      <div style={{ display: "flex", gap: 8 }}>
+        <input
+          value={youtubeState.query}
+          placeholder="Search YouTube..."
+          onChange={(e) =>
+            youtubeDispatch({ type: "setQuery", payload: e.target.value })
+          }
+          onKeyDown={(e) => {
+            if (e.key === "Enter") onSearch();
+          }}
+        />
 
-      <h1>Vite + React</h1>
-
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
+        <button onClick={onSearch} disabled={youtubeState.status === "loading"}>
+          {youtubeState.status === "loading" ? "Searching..." : "Search"}
         </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+
+      {youtubeState.status === "error" && (
+        <p style={{ marginTop: 12 }}>Error: {youtubeState.error}</p>
+      )}
+
+      <div style={{ marginTop: 16, display: "grid", gap: 12 }}>
+        {youtubeState.videos.map((v) => (
+          <a
+            key={v.id}
+            href={v.url}
+            target="_blank"
+            rel="noreferrer"
+            style={{
+              display: "flex",
+              gap: 12,
+              textDecoration: "none",
+              border: "1px solid #ddd",
+              padding: 12,
+              borderRadius: 8,
+              color: "inherit",
+            }}
+          >
+            <img src={v.thumbnailUrl} alt={v.title} width={160} />
+            <div>
+              <div style={{ fontWeight: 600 }}>{v.title}</div>
+              <div style={{ opacity: 0.7, marginTop: 4 }}>{v.channelTitle}</div>
+              <div style={{ opacity: 0.7, marginTop: 4 }}>
+                {new Date(v.publishedAt).toLocaleString()}
+              </div>
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
   );
 }
 
